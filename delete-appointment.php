@@ -1,28 +1,45 @@
 <?php
+session_start();
 
-    session_start();
+// 1. التحقق من تسجيل الدخول والصحة - تعديل الشرط للسماح للمسؤولين والأطباء
+if(!isset($_SESSION["user"]) || $_SESSION["user"] == "" || ($_SESSION['usertype'] != 'a' && $_SESSION['usertype'] != 'd')) {
+    header("location: ../login.php");
+    exit();
+}
 
-    if(isset($_SESSION["user"])){
-        if(($_SESSION["user"])=="" or $_SESSION['usertype']!='a'){
-            header("location: ../login.php");
-        }
+// 2. التحقق من وجود ID
+if(!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
+    $_SESSION['error'] = "معرف الموعد غير صالح";
+    header("location: appointment.php");
+    exit();
+}
 
-    }else{
-        header("location: ../login.php");
-    }
-    
-    
-    if($_GET){
-        //import database
-        include("../connection.php");
-        $id=$_GET["id"];
-        //$result001= $database->query("select * from schedule where scheduleid=$id;");
-        //$email=($result001->fetch_assoc())["docemail"];
-        $sql= $database->query("delete from appointment where appoid='$id';");
-        //$sql= $database->query("delete from doctor where docemail='$email';");
-        //print_r($email);
-        header("location: appointment.php");
-    }
+// 3. الاتصال بقاعدة البيانات
+include("../connection.php");
+if($database->connect_error) {
+    die("فشل الاتصال بقاعدة البيانات: " . $database->connect_error);
+}
 
+// 4. تنفيذ عملية الحذف
+$id = intval($_GET["id"]); // تأمين المدخلات
+$sql = "DELETE FROM appointment WHERE appoid = ?";
+$stmt = $database->prepare($sql);
 
+if(!$stmt) {
+    $_SESSION['error'] = "تحضير الاستعلام فشل: " . $database->error;
+    header("location: appointment.php");
+    exit();
+}
+
+$stmt->bind_param("i", $id);
+if($stmt->execute()) {
+} else {
+}
+
+$stmt->close();
+$database->close();
+
+// 5. إعادة التوجيه
+header("location: appointment.php");
+exit();
 ?>

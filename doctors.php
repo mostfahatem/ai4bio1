@@ -27,7 +27,9 @@
 
     if(isset($_SESSION["user"])){
         if(($_SESSION["user"])=="" or $_SESSION['usertype']!='a'){
-            header("location: ../login.php");
+            //header("location: ../login.php");
+        }else{
+            $useremail=$_SESSION["user"];
         }
 
     }else{
@@ -487,7 +489,7 @@
                                     <select name="spec" id="" class="box" >';
                                         
         
-                                        $list11 = $database->query("select  * from  specialties order by sname asc;");
+                                        $list11 = $database->query("select  * from  specialties;");
         
                                         for ($y=0;$y<$list11->num_rows;$y++){
                                             $row00=$list11->fetch_assoc();
@@ -616,7 +618,6 @@
                                             <form action="edit-doc.php" method="POST" class="add-new-form">
                                             <label for="Email" class="form-label">Email: </label>
                                             <input type="hidden" value="'.$id.'" name="id00">
-                                            <input type="hidden" name="oldemail" value="'.$email.'" >
                                         </td>
                                     </tr>
                                     <tr>
